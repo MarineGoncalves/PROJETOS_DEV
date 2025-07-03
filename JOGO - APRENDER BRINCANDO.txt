@@ -1,0 +1,719 @@
+LINK APK : build/app/outputs/flutter-apk/app-release.apk
+
+
+
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() {
+  runApp(AprenderBrincandoApp());
+}
+
+class AprenderBrincandoApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Aprender Brincando!',
+      theme: ThemeData(fontFamily: 'ComicSans'),
+      home: LoginScreen(),
+    );
+  }
+}
+
+class LoginScreen extends StatelessWidget {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController codeController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFADD8E6),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(height: 40),
+              Text(
+                'Aprender Brincando!',
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 40),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Digite seu nome:',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: codeController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Digite seu código:',
+                  prefixIcon: Icon(Icons.vpn_key),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (nameController.text.isNotEmpty &&
+                      codeController.text.isNotEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DesafiosScreen()),
+                    );
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Erro'),
+                          content: Text('Por favor, preencha todos os campos.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('ENTRAR'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => RecuperarCodigoScreen()),
+                  );
+                },
+                child: Text('Esqueci meu código'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => CriarContaScreen()),
+                  );
+                },
+                child: Text('Sou novo aqui! Criar conta'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class DesafiosScreen extends StatelessWidget {
+  const DesafiosScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFF6A4ECF),
+      appBar: AppBar(title: Text('Desafios')),
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(20),
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
+        children: [
+          DesafioCard(
+            titulo: 'MATEMÁTICA',
+            cor: Colors.orange,
+            destino: MatematicaJogo(),
+          ),
+          DesafioCard(
+            titulo: 'CIÊNCIAS',
+            cor: Colors.green,
+            destino: ComposicaoAguaJogo(),
+          ),
+          DesafioCard(
+            titulo: 'PORTUGUÊS',
+            cor: Colors.yellow,
+            destino: PalavrasJogo(),
+          ),
+          DesafioCard(
+            titulo: 'HISTÓRIA',
+            cor: Colors.blue,
+            destino: LinhaTempoJogo(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class DesafioCard extends StatelessWidget {
+  final String titulo;
+  final Color cor;
+  final Widget destino;
+
+  const DesafioCard({
+    Key? key,
+    required this.titulo,
+    required this.cor,
+    required this.destino,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () =>
+          Navigator.push(context, MaterialPageRoute(builder: (_) => destino)),
+      child: Card(
+        color: cor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Center(
+          child: Text(
+            titulo,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Telas dos jogos a seguir...
+class MatematicaJogo extends StatefulWidget {
+  const MatematicaJogo({super.key});
+
+  @override
+  _MatematicaJogoState createState() => _MatematicaJogoState();
+}
+
+class _MatematicaJogoState extends State<MatematicaJogo> {
+  int num1 = Random().nextInt(10) + 1;
+  int num2 = Random().nextInt(10) + 1;
+  int correctAnswer = 0;
+  List<int> options = [];
+
+  @override
+  void initState() {
+    super.initState();
+    generateQuestion();
+  }
+
+  void generateQuestion() {
+    num1 = Random().nextInt(10) + 1;
+    num2 = Random().nextInt(10) + 1;
+    correctAnswer = num1 - num2;
+
+    options = List.generate(3, (index) {
+      int option;
+      do {
+        option = Random().nextInt(10) + 1;
+      } while (option == correctAnswer || options.contains(option));
+      return option;
+    });
+    options.add(correctAnswer);
+    options.shuffle();
+  }
+
+  void checkAnswer(int selectedAnswer) {
+    bool isCorrect = selectedAnswer == correctAnswer;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isCorrect ? 'Correto!' : 'Incorreto!'),
+          content: Text(isCorrect ? 'Você acertou!' : 'Tente novamente.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  if (isCorrect) {
+                    Navigator.pop(context);
+                  } else {
+                    generateQuestion();
+                  }
+                });
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.orange,
+      appBar: AppBar(title: Text('Matemática')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Column(
+              children: [
+                Text('$num1 - $num2 = ?', style: TextStyle(fontSize: 32)),
+                Wrap(
+                  spacing: 10,
+                  children: options
+                      .map<Widget>(
+                        (n) => ElevatedButton(
+                          onPressed: () {
+                            checkAnswer(n);
+                          },
+                          child: Text('$n'),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class PalavrasJogo extends StatefulWidget {
+  const PalavrasJogo({super.key});
+
+  @override
+  _PalavrasJogoState createState() => _PalavrasJogoState();
+}
+
+class _PalavrasJogoState extends State<PalavrasJogo> {
+  String palavra = "GATO";
+  String letraCorreta = "A";
+  List<String> letras = ["A", "E", "U", "I"];
+  String letraSelecionada = "";
+
+  @override
+  void initState() {
+    super.initState();
+    letras.shuffle();
+  }
+
+  void checkAnswer(String selectedLetter) {
+    bool isCorrect = selectedLetter == letraCorreta;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isCorrect ? 'Correto!' : 'Incorreto!'),
+          content: Text(isCorrect ? 'Você acertou!' : 'Tente novamente.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  if (isCorrect) {
+                    Navigator.pop(context);
+                  }
+                });
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.purple,
+      appBar: AppBar(title: Text('Palavras Perdidas')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Complete a palavra: G${letraSelecionada.isNotEmpty ? letraSelecionada : '_'}TO',
+              style: TextStyle(fontSize: 28),
+            ),
+            Wrap(
+              spacing: 10,
+              children: letras
+                  .map<Widget>(
+                    (letra) => ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          letraSelecionada = letra;
+                        });
+                        checkAnswer(letra);
+                      },
+                      child: Text(letra),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ComposicaoAguaJogo extends StatefulWidget {
+  @override
+  _ComposicaoAguaJogoState createState() => _ComposicaoAguaJogoState();
+}
+
+class _ComposicaoAguaJogoState extends State<ComposicaoAguaJogo> {
+  final List<String> opcoes = ['CO₂', 'H₂O', 'NaCl', 'O₂'];
+  late int respostaCorretaIndex;
+  bool respondeu = false;
+  bool acertou = false;
+
+  @override
+  void initState() {
+    super.initState();
+    respostaCorretaIndex = opcoes.indexOf('H₂O');
+    opcoes.shuffle(); // Embaralha as opções para não ficar previsível
+  }
+
+  void verificarResposta(int index) {
+    setState(() {
+      respondeu = true;
+      acertou = opcoes[index] == 'H₂O';
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(acertou ? 'Correto!' : 'Incorreto!'),
+          content: Text(
+            acertou
+                ? 'Você acertou! A água é formada por H₂O.'
+                : 'Resposta errada. Tente novamente!',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  if (acertou) {
+                    Navigator.pop(context); // Sai do jogo após acerto
+                  } else {
+                    opcoes.shuffle(); // Embaralha para nova tentativa
+                    respondeu = false;
+                    acertou = false;
+                  }
+                });
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFADD8E6),
+      appBar: AppBar(title: Text('Composição da Água')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Qual destas representa a água?',
+              style: TextStyle(fontSize: 20),
+            ),
+            SizedBox(height: 30),
+            ...List.generate(opcoes.length, (index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: ElevatedButton(
+                  onPressed: respondeu ? null : () => verificarResposta(index),
+                  child: Text(opcoes[index], style: TextStyle(fontSize: 24)),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LinhaTempoJogo extends StatefulWidget {
+  const LinhaTempoJogo({super.key});
+
+  @override
+  _LinhaTempoJogoState createState() => _LinhaTempoJogoState();
+}
+
+class _LinhaTempoJogoState extends State<LinhaTempoJogo> {
+  List<String> eventos = [
+    'Homem das cavernas',
+    'Pirâmides do Egito',
+    'Cavaleiro medieval',
+    'Caravela',
+  ];
+  List<String> ordemCorreta = [
+    'Homem das cavernas',
+    'Pirâmides do Egito',
+    'Cavaleiro medieval',
+    'Caravela',
+  ];
+  List<String> ordemAtual = [];
+
+  @override
+  void initState() {
+    super.initState();
+    eventos.shuffle();
+    ordemAtual = List.from(eventos);
+  }
+
+  void checkAnswer() {
+    bool isCorrect = List.generate(
+      eventos.length,
+      (index) => ordemAtual[index] == ordemCorreta[index],
+    ).every((element) => element);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isCorrect ? 'Correto!' : 'Incorreto!'),
+          content: Text(
+            isCorrect ? 'Você acertou a ordem!' : 'Tente novamente.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  if (isCorrect) {
+                    Navigator.pop(context);
+                  } else {
+                    eventos.shuffle();
+                    ordemAtual = List.from(eventos);
+                  }
+                });
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void moveEvent(int oldIndex, int newIndex) {
+    setState(() {
+      if (oldIndex < newIndex) {
+        newIndex -= 1;
+      }
+      final String item = ordemAtual.removeAt(oldIndex);
+      ordemAtual.insert(newIndex, item);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.deepPurple,
+      appBar: AppBar(title: Text('Linha do Tempo')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Ordene os eventos históricos arrastando os nomes',
+              style: TextStyle(fontSize: 24),
+            ),
+            Expanded(
+              child: ReorderableListView.builder(
+                itemCount: ordemAtual.length,
+                onReorder: (oldIndex, newIndex) =>
+                    moveEvent(oldIndex, newIndex),
+                itemBuilder: (context, index) {
+                  return Card(
+                    key: Key('$index'),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: Text(ordemAtual[index])),
+                    ),
+                  );
+                },
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                checkAnswer();
+              },
+              child: Text('VERIFICAR'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RecuperarCodigoScreen extends StatelessWidget {
+  final TextEditingController emailController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFB89EFF),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Informe um e-mail para recuperação.',
+                style: TextStyle(fontSize: 22),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(
+                  labelText: 'Digite seu e-mail',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (emailController.text.isNotEmpty) {
+                    Navigator.pop(context);
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Erro'),
+                          content: Text(
+                            'Por favor, preencha o campo de e-mail.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('ENVIAR'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  minimumSize: Size(double.infinity, 50),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text('Voltar para o Login'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CriarContaScreen extends StatelessWidget {
+  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController codigoController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Color(0xFFB89EFF),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Criar Conta', style: TextStyle(fontSize: 24)),
+              SizedBox(height: 20),
+              TextField(
+                controller: nomeController,
+                decoration: InputDecoration(
+                  labelText: 'Digite seu nome',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: codigoController,
+                decoration: InputDecoration(
+                  labelText: 'Crie um código',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (nomeController.text.isNotEmpty &&
+                      codigoController.text.isNotEmpty) {
+                    Navigator.pop(context);
+                  } else {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Erro'),
+                          content: Text('Por favor, preencha todos os campos.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Text('CRIAR'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
